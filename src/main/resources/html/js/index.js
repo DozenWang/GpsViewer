@@ -1,6 +1,6 @@
 $(function () {
 
-    var map, showTimeLab,
+    var map, labelType,
         lineArr = new Array();
 
     map = new AMap.Map("mapContainer", {
@@ -15,7 +15,7 @@ $(function () {
     });
     // 读取配置文件
     if (gConf) {
-        showTimeLab = gConf.showTime;
+        labelType = gConf.labelType;
     }
 
     (function loadLocations() {
@@ -76,22 +76,19 @@ $(function () {
         circle.setMap(map);
     }
 
-    function addTimeLabel(lon, lat, timestamp) {
+    function addLabel(lon, lat, label) {
         var marker = new AMap.Marker({
             position: new AMap.LngLat(lon, lat)
         });
 
-        var time = new Date();
-        time.setTime(timestamp);
-
         // 设置label标签
         marker.setLabel({ //label的父div默认蓝框白底右下角显示，样式className为：amap-marker-label
             //offset:new AMap.Pixel(50,50),//修改父div相对于maker的位置
-            content: time.toLocaleString(),
-            title: time.toLocaleString()
+            content: label,
+            title: label
         });
         marker.on('click', function () {
-            alert(time.toLocaleString())
+            alert(label)
         });
         marker.setMap(map);
     }
@@ -109,11 +106,14 @@ $(function () {
         }
 
         drawGpsLine(lineArr);
-
+        var time = new Date();
         for (var i = 0; i < arr_r.length; i++) {
             addCircle(arr_x[i], arr_y[i], arr_r[i]);
-            if (showTimeLab) {
-                addTimeLabel(arr_x[i], arr_y[i], arr_time[i]);
+            if (labelType == 'time') {
+                time.setTime(arr_time[i]);
+                addLabel(arr_x[i], arr_y[i], time.toLocaleString());
+            } else if (labelType == 'num') {
+                addLabel(arr_x[i], arr_y[i], i);
             }
         }
     }

@@ -20,7 +20,7 @@ public class ViewGenerator {
 
         initOptions();
 
-        String helpStr = "java -jar gpsViewer.jar <logfile> [-o/--output][-t/--time][-h/--help]";
+        String helpStr = "java -jar gpsViewer.jar <logfile> [-o/--output][-l/--label][-h/--help]";
         HelpFormatter helpFormatter = new HelpFormatter();
         CommandLineParser parser = new DefaultParser();
         CommandLine cl;
@@ -52,7 +52,7 @@ public class ViewGenerator {
         }
 
         // 主要处理逻辑
-        boolean showTime = cl.hasOption(PARAM_SHOWTIME);
+        String labelType = cl.hasOption(PARAM_LABEL)?cl.getOptionValue(PARAM_LABEL):"none";
         String outPutFilePath = cl.hasOption(PARAM_OUTPUTDIR) ? cl.getOptionValue(PARAM_OUTPUTDIR) : null;
         String logFile = getAbsPath(args[0]);
         String platform = cl.hasOption(PARAM_PLATFORM) ? cl.getOptionValue(PARAM_PLATFORM) : "android";
@@ -88,7 +88,7 @@ public class ViewGenerator {
 
             // 写配置文件
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("showTime", showTime);
+            jsonObject.put("labelType", labelType);
             writeFile("gConf=" + jsonObject.toString(), outPutFilePath + "/conf.json.js");
         } catch (IOException e) {
             System.err.println("erro : 写位置数据失败");
@@ -100,7 +100,7 @@ public class ViewGenerator {
     }
 
     private static final String PARAM_OUTPUTDIR = "o";
-    private static final String PARAM_SHOWTIME = "t";
+    private static final String PARAM_LABEL = "l";
     private static final String PARAM_HELP = "h";
     private static final String PARAM_PLATFORM = "p";
 
@@ -120,8 +120,11 @@ public class ViewGenerator {
                 .valueSeparator('=')
                 .build();
 
-        Option timeOpt = Option.builder(PARAM_SHOWTIME).desc("是否输出时间标签")
-                .longOpt("time")
+        Option labelOpt = Option.builder(PARAM_LABEL).desc("输出标签的种类[time/num],默认不显示标签")
+                .longOpt("label")
+                .hasArg()
+                .type(String.class)
+                .valueSeparator('=')
                 .build();
 
         Option helpOpt = Option.builder(PARAM_HELP).desc("显示帮助")
@@ -131,7 +134,7 @@ public class ViewGenerator {
         m_ParamsOptions = new Options();
         m_ParamsOptions.addOption(outputOpt);
         m_ParamsOptions.addOption(platformOpt);
-        m_ParamsOptions.addOption(timeOpt);
+        m_ParamsOptions.addOption(labelOpt);
         m_ParamsOptions.addOption(helpOpt);
     }
 
