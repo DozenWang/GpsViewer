@@ -1,0 +1,42 @@
+body {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+}
+
+#mapContainer {
+    height: 100%;
+    width: 100%;
+}
+
+#tip {
+    height: 45px;
+    background-color: #fff;
+    padding-left: 10px;
+    padding-right: 10px;
+    border: 1px solid #969696;
+    position: absolute;
+    font-size: 12px;
+    right: 10px;
+    bottom: 30px;
+    border-radius: 3px;
+    line-height: 45px;
+}
+
+#tip input[type='button'] {
+    height: 28px;
+    line-height: 28px;
+    outline: none;
+    text-align: center;
+    padding-left: 5px;
+    padding-right: 5px;
+    color: #FFF;
+    background-color: #0D9BF2;
+    border: 0;
+    border-radius: 3px;
+    margin-top: 8px;
+    margin-left: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+}
