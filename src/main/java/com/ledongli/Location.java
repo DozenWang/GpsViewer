@@ -1,53 +1,56 @@
 package com.ledongli;
 
+import com.ledongli.util.GeomTransform;
+
 /**
  * Created by xingjiu on 11/11/15.
  */
 public class Location {
-    double lon;
-    double lat;
-    double accuracy;
-    double speed;
-    double course;
+    double longitude;
+    double latitude;
+    float accuracy;
+    float speed;
+    float course;
     long time;
+    GeomTransform geomTransform = new GeomTransform();
 
-    public double getLon() {
-        return lon;
+    public double getLongitude() {
+        return longitude;
     }
 
-    public void setLon(double lon) {
-        this.lon = lon;
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
-    public double getLat() {
-        return lat;
+    public double getLatitude() {
+        return latitude;
     }
 
-    public void setLat(double lat) {
-        this.lat = lat;
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 
-    public double getAccuracy() {
+    public float getAccuracy() {
         return accuracy;
     }
 
-    public void setAccuracy(double accuracy) {
+    public void setAccuracy(float accuracy) {
         this.accuracy = accuracy;
     }
 
-    public double getSpeed() {
+    public float getSpeed() {
         return speed;
     }
 
-    public void setSpeed(double speed) {
+    public void setSpeed(float speed) {
         this.speed = speed;
     }
 
-    public double getCourse() {
+    public float getCourse() {
         return course;
     }
 
-    public void setCourse(double course) {
+    public void setCourse(float course) {
         this.course = course;
     }
 
@@ -57,5 +60,20 @@ public class Location {
 
     public void setTime(long time) {
         this.time = time;
+    }
+
+    public double distanceTo(Location otherLoc) {
+        return geomTransform.getDistance(this.getLongitude(), this.getLatitude(), otherLoc.getLongitude(), otherLoc.getLatitude());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.getLongitude()).append("\t");
+        sb.append(this.getLatitude()).append("\t");
+        sb.append(this.getAccuracy()).append("\t");
+        sb.append(this.getSpeed()).append("\t");
+        sb.append(this.getTime());
+        return sb.toString();
     }
 }

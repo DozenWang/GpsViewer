@@ -18,10 +18,10 @@ public class AndroidLog implements ILocationParser {
         for (String str : list) {
             String locationStr[] = str.trim().split(",");
             Location location = new Location();
-            location.setLon(Double.parseDouble(locationStr[0]));
-            location.setLat(Double.parseDouble(locationStr[1]));
-            location.setAccuracy(Double.parseDouble(locationStr[2]));
-            location.setSpeed(Double.parseDouble(locationStr[3]));
+            location.setLongitude(Double.parseDouble(locationStr[0]));
+            location.setLatitude(Double.parseDouble(locationStr[1]));
+            location.setAccuracy(Float.parseFloat(locationStr[2]));
+            location.setSpeed(Float.parseFloat(locationStr[3]));
             location.setTime((long) Double.parseDouble(locationStr[4]) * 1000);
 
             locations.add(location);

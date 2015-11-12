@@ -27,8 +27,8 @@ $(function () {
         var arr_time = [];
 
         $.each(data, function (infoIndex, info) {
-            arr_x.push(info["lon"]);
-            arr_y.push(info["lat"]);
+            arr_x.push(info["longitude"]);
+            arr_y.push(info["latitude"]);
             arr_r.push(info["accuracy"]);
             arr_time.push(info["time"]);
         });
@@ -113,7 +113,7 @@ $(function () {
                 time.setTime(arr_time[i]);
                 addLabel(arr_x[i], arr_y[i], time.toLocaleString());
             } else if (labelType == 'num') {
-                addLabel(arr_x[i], arr_y[i], i);
+                addLabel(arr_x[i], arr_y[i], i+1);
             }
         }
     }

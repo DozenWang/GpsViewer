@@ -2,11 +2,13 @@ package com.ledongli;
 
 import com.ledongli.logParser.AndroidLog;
 import com.ledongli.logParser.ILocationParser;
+import com.ledongli.util.GpsValidate;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.cli.*;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,6 +82,14 @@ public class ViewGenerator {
             return;
         }
 
+        if (cl.hasOption(PARAM_FILTER)) {
+            locationList = filterLoc(locationList);
+        }
+
+        if (cl.hasOption(PARAM_VERBOS)) {
+            printVerbos(locationList);
+        }
+
         JSONArray json = JSONArray.fromObject(locationList);
 
         try {
@@ -103,6 +113,8 @@ public class ViewGenerator {
     private static final String PARAM_LABEL = "l";
     private static final String PARAM_HELP = "h";
     private static final String PARAM_PLATFORM = "p";
+    private static final String PARAM_FILTER = "f";
+    private static final String PARAM_VERBOS = "v";
 
     private static void initOptions() {
 
@@ -110,21 +122,29 @@ public class ViewGenerator {
                 .longOpt("output")
                 .hasArg()
                 .type(String.class)
-                .valueSeparator('=')
+                .valueSeparator(' ')
+                .build();
+
+        Option filterOpt = Option.builder(PARAM_FILTER).desc("使用android上的gps过滤策略")
+                .longOpt("filter")
                 .build();
 
         Option platformOpt = Option.builder(PARAM_PLATFORM).desc("日志文件类型[android/ios],默认为android")
                 .longOpt("platform")
                 .hasArg()
                 .type(String.class)
-                .valueSeparator('=')
+                .valueSeparator(' ')
                 .build();
 
         Option labelOpt = Option.builder(PARAM_LABEL).desc("输出标签的种类[time/num],默认不显示标签")
                 .longOpt("label")
                 .hasArg()
                 .type(String.class)
-                .valueSeparator('=')
+                .valueSeparator(' ')
+                .build();
+
+        Option verbosOpt = Option.builder(PARAM_VERBOS).desc("处理后的gps点和距离等信息")
+                .longOpt("verbos")
                 .build();
 
         Option helpOpt = Option.builder(PARAM_HELP).desc("显示帮助")
@@ -133,8 +153,10 @@ public class ViewGenerator {
 
         m_ParamsOptions = new Options();
         m_ParamsOptions.addOption(outputOpt);
+        m_ParamsOptions.addOption(filterOpt);
         m_ParamsOptions.addOption(platformOpt);
         m_ParamsOptions.addOption(labelOpt);
+        m_ParamsOptions.addOption(verbosOpt);
         m_ParamsOptions.addOption(helpOpt);
     }
 
@@ -217,6 +239,67 @@ public class ViewGenerator {
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }
+    }
+
+    private static List<Location> filterLoc(List<Location> locations) {
+        GpsValidate<Location> m_gpsValidate = new GpsValidate<Location>(new GpsValidate.LocationPicker<Location>() {
+            @Override
+            public double getLongitude(Location obj) {
+                return obj.getLongitude();
+            }
+
+            @Override
+            public double getLatitude(Location obj) {
+                return obj.getLatitude();
+            }
+
+            @Override
+            public float getSpeed(Location obj) {
+                return obj.getSpeed();
+            }
+
+            @Override
+            public long getTime(Location obj) {
+                return obj.getTime();
+            }
+
+            @Override
+            public float getAccuracy(Location obj) {
+
+                return obj.getAccuracy();
+            }
+
+        });
+
+        Location lastLoc = null;
+        List<Location> result = new ArrayList<Location>();
+        for (Location loc : locations) {
+            if (m_gpsValidate.validate(lastLoc, loc)) {
+                lastLoc = loc;
+                result.add(loc);
+            }
+        }
+        return result;
+    }
+
+    private static void printVerbos(List<Location> locationList) {
+        System.out.println("-------------------处理后GPS序列--------------------");
+        double distance = 0;
+
+        for (int i = 0; i < locationList.size(); i++) {
+            System.out.print((i + 1) + ": " + locationList.get(i).toString());
+
+            if (i >= 1) {
+                double tdis = locationList.get(i).distanceTo(locationList.get(i-1));
+                System.out.println("\t (timeInterval="+(locationList.get(i).getTime() - locationList.get(i-1).getTime()) +" distance="+tdis+")");
+                distance += tdis;
+            } else {
+                System.out.println();
+            }
+        }
+
+        System.out.println("------------------总距离---------------------");
+        System.out.println("距离: " + distance);
     }
 
 }
