@@ -1,6 +1,6 @@
 $(function () {
 
-    var map, labelType,
+    var map,
         lineArr = new Array();
 
     map = new AMap.Map("mapContainer", {
@@ -14,9 +14,9 @@ $(function () {
         })
     });
     // 读取配置文件
-    if (gConf) {
-        labelType = gConf.labelType;
-    }
+    //if (gConf) {
+    //    userConf.labelType = gConf.labelType;
+    //}
 
     (function loadLocations() {
         var data = gLocations;
@@ -109,12 +109,16 @@ $(function () {
         var time = new Date();
         for (var i = 0; i < arr_r.length; i++) {
             addCircle(arr_x[i], arr_y[i], arr_r[i]);
-            if (labelType == 'time') {
-                time.setTime(arr_time[i]);
-                addLabel(arr_x[i], arr_y[i], time.toLocaleString());
-            } else if (labelType == 'num') {
-                addLabel(arr_x[i], arr_y[i], i+1);
+            if (gConf) {
+                var offset = gConf.index || 1;
+                if (gConf.labelType == 'time') {
+                    time.setTime(arr_time[i]);
+                    addLabel(arr_x[i], arr_y[i], time.toLocaleString());
+                } else if (gConf.labelType == 'num') {
+                    addLabel(arr_x[i], arr_y[i], i + offset);
+                }
             }
+
         }
     }
 

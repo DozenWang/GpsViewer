@@ -58,6 +58,7 @@ public class ViewGenerator {
         String outPutFilePath = cl.hasOption(PARAM_OUTPUTDIR) ? cl.getOptionValue(PARAM_OUTPUTDIR) : null;
         String logFile = getAbsPath(args[0]);
         String platform = cl.hasOption(PARAM_PLATFORM) ? cl.getOptionValue(PARAM_PLATFORM) : "android";
+        String pointInterval = cl.hasOption(PARAM_INTERVAL)?cl.getOptionValue(PARAM_INTERVAL):null;
 
         if (null == outPutFilePath) {
             File appFilePath = new File(ViewGenerator.class.getProtectionDomain().getCodeSource().getLocation().getPath());
@@ -90,6 +91,23 @@ public class ViewGenerator {
             printVerbos(locationList);
         }
 
+        int begin=0,end=0;
+        if (cl.hasOption(PARAM_INTERVAL)) {
+            String interval[] = pointInterval.split(",");
+            if (null == interval || interval.length < 2) {
+                System.err.println("i 的参数错误，正确格式如 i=5,9");
+                return;
+            }
+
+            begin = Integer.parseInt(interval[0]);
+            end = Integer.parseInt(interval[1]);
+            if (end < begin) {
+                System.err.println("起始位置必须小于结束为止");
+                return;
+            }
+            locationList = locationList.subList(begin, end);
+        }
+
         JSONArray json = JSONArray.fromObject(locationList);
 
         try {
@@ -99,6 +117,7 @@ public class ViewGenerator {
             // 写配置文件
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("labelType", labelType);
+            jsonObject.put("index", begin);
             writeFile("gConf=" + jsonObject.toString(), outPutFilePath + "/conf.json.js");
         } catch (IOException e) {
             System.err.println("erro : 写位置数据失败");
@@ -111,6 +130,7 @@ public class ViewGenerator {
 
     private static final String PARAM_OUTPUTDIR = "o";
     private static final String PARAM_LABEL = "l";
+    private static final String PARAM_INTERVAL = "i";
     private static final String PARAM_HELP = "h";
     private static final String PARAM_PLATFORM = "p";
     private static final String PARAM_FILTER = "f";
@@ -143,6 +163,13 @@ public class ViewGenerator {
                 .valueSeparator(' ')
                 .build();
 
+        Option intervalOpt = Option.builder(PARAM_INTERVAL).desc("显示某个区间内的点 i=[begin,end]")
+                .longOpt("interval")
+                .hasArg()
+                .type(String.class)
+                .valueSeparator('=')
+                .build();
+
         Option verbosOpt = Option.builder(PARAM_VERBOS).desc("处理后的gps点和距离等信息")
                 .longOpt("verbos")
                 .build();
@@ -156,6 +183,7 @@ public class ViewGenerator {
         m_ParamsOptions.addOption(filterOpt);
         m_ParamsOptions.addOption(platformOpt);
         m_ParamsOptions.addOption(labelOpt);
+        m_ParamsOptions.addOption(intervalOpt);
         m_ParamsOptions.addOption(verbosOpt);
         m_ParamsOptions.addOption(helpOpt);
     }
@@ -290,9 +318,13 @@ public class ViewGenerator {
             System.out.print((i + 1) + ": " + locationList.get(i).toString());
 
             if (i >= 1) {
-                double tdis = locationList.get(i).distanceTo(locationList.get(i-1));
-                System.out.println("\t (timeInterval="+(locationList.get(i).getTime() - locationList.get(i-1).getTime()) +" distance="+tdis+")");
+                long timeinterval = (locationList.get(i).getTime() - locationList.get(i-1).getTime());
+                double tdis=0;
+                tdis = locationList.get(i).distanceTo(locationList.get(i-1));
                 distance += tdis;
+
+                System.out.println("\t (timeInterval="+ (timeinterval/1000) +" distance="+tdis+")");
+
             } else {
                 System.out.println();
             }
