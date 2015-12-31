@@ -22,7 +22,7 @@ public class AndroidLog implements ILocationParser {
             location.setLatitude(Double.parseDouble(locationStr[1]));
             location.setAccuracy(Float.parseFloat(locationStr[2]));
             location.setSpeed(Float.parseFloat(locationStr[3]));
-            location.setTime((long) Double.parseDouble(locationStr[4]) * 1000);
+            location.setTime((long) (Double.parseDouble(locationStr[4]) * 1000));
 
             locations.add(location);
         }
