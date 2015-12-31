@@ -10,6 +10,7 @@ public class GpsValidate<T> {
     private LocationPicker<T> mPicker;
     Location temp1;
     Location temp2;
+    private int idleCount = 0;
 
     public GpsValidate(LocationPicker<T> picker) {
         assert (null != picker);
@@ -49,8 +50,13 @@ public class GpsValidate<T> {
 
             // 如果单点speed为零
             if (mPicker.getSpeed(validatePoint) < 0.01) {
+                if (++idleCount < 3) {
+                    return false;
+                } else {
+                    idleCount = 0;
+                    return true;
+                }
 
-                return false;
             }
 
             long time = Math.abs(mPicker.getTime(validatePoint) - mPicker.getTime(lastPoint));
@@ -62,9 +68,21 @@ public class GpsValidate<T> {
             if (speed > 40) {
                 return false;
             }
+            idleCount = 0;
+            return true;
+        }  else {
+            // 第一个点需要根据做特殊判断:如果
+            if (mPicker.getSpeed(validatePoint) > 0.01) {
+                idleCount = 0;
+                return true;
+            } else {
+                if (++idleCount > 3) {
+                    idleCount = 0;
+                    return true;
+                }
+                return false;
+            }
         }
-
-        return true;
     }
 
     public interface LocationPicker<T> {
